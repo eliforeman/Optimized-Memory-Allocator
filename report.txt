@@ -1,0 +1,54 @@
+CS3650 Challenge 02
+Eli Foreman, Spencer Hurley 
+
+local
+CPU(s):              2
+Core(s) per socket:  2
+Model name:          Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz
+OS: Xubunutu 18.04
+
+local (input of 5000)
+----------------------------------------------
+Allocator |test1 |test2 |test3| 
+----------------------------------------------
+Par(list)  .01	   .02	   .02
+
+
+Hw7(list)  81.78   82.32   81.76
+
+
+Sys(list)  .11	   .13	   .15	
+
+
+Par(ivec)  .17      .17   .15 
+
+
+Hw7(ivec)  6.55    8.00   7.65
+
+
+Sys(ivec) .06      .04      .03
+
+
+
+When creating our allocator we decided on using a bucket/arena strategy. We both
+thought the concept of dividing the free list into buckets of exact blocks was an
+intuitive O(1) solution. We accomplished this by first creating a structure for both
+the nodes (chunks) and arenas. We then created the thread accessible variable 
+called local_arena that had acesss to its own local freelist. After intializing the 
+arena with buckets, we take the amount the user wants to malloc, round it up to
+the nearest power of two (to decide what bucket it goes in) and depending on the size
+of the allocation to the following. For mallocs that are bigger than the largest bucket
+(8129) we just mmap data that is the size of the input + 24 (our header). If it isn't
+bigger than the largest bucket, we put the chunk in the correct bucket. We can effenciently
+do this by make use of space from larger buckets to accomodate smaller buckets.
+
+These results were interesting. Since hw07 is slowed down by lock contention, it makes sense
+that it was slower than par and sys, but the fact that it was so much slower than the other two
+was a bit surprising. We also found that the larger the number for ivec, the easier we had with beating
+sys. When the input was 5,000 we were getting crushed by sys (see above table), but if we changed 
+it from 5,000 to 500,000 then we beat sys pretty easily. At 500,000 sys(ivec) is .42 while our's
+is only .21. This might be because the bucket algo is pretty fast so it deals with larger numbers easier. 
+
+
+
+
